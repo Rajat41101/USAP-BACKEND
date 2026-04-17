@@ -88,7 +88,34 @@ def register():
                 "email": email
             }
         }), 201
+# 5. User Login Route
+@app.route('/api/login', methods=['POST'])
+def login():
+    try:
+        data = request.json
+        email = data.get('email')
+        password = data.get('password')
 
+        users_collection = db['users']
+        user = users_collection.find_one({"email": email})
+
+        if user and user.get('password') == password:
+            return jsonify({
+                "message": "Login successful",
+                "user": {
+                    "id": str(user['_id']),
+                    "firstName": user.get('firstName'),
+                    "email": user.get('email'),
+                    "role": user.get('role'),
+                    "dept": user.get('department')
+                }
+            }), 200
+        else:
+            return jsonify({"message": "Invalid email or password"}), 401
+
+    except Exception as e:
+        print(f"Error during login: {e}")
+        return jsonify({"error": str(e)}), 500
     except Exception as e:
         print(f"Error during registration: {e}")
         return jsonify({"error": str(e)}), 500
